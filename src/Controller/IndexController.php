@@ -11,8 +11,8 @@ class IndexController extends AbstractController
 	/**
 	 * @Route("/api/test", name="test")
 	 */
-    public function index(): string
+    public function index(): Response
     {
-        return 'Test';
+        return $this->json('test');
     }
 }
