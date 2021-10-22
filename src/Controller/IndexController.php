@@ -8,11 +8,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class IndexController extends AbstractController
 {
-	/**
-	 * @Route("/api/test", name="test")
-	 */
-    public function index(): Response
-    {
-        return $this->json('test');
-    }
+	#[Route('/api/test', name: 'api_test')]
+	public function test(): Response {
+		return $this->json('top');
+	}
 }
