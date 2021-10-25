@@ -63,6 +63,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 		return $query->execute();
 	}
 
+	// Find User with Api key
+	public function findUserByApiKey($apiKey)
+	{
+		return $this->createQueryBuilder('u')
+			->andWhere('u.userApiKey = :apiKey')
+			->setParameter('apiKey', $apiKey)
+			->getQuery()
+			->getOneOrNullResult();
+	}
+
     // /**
     //  * @return User[] Returns an array of User objects
     //  */

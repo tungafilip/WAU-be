@@ -22,6 +22,8 @@ class UserController extends AbstractController
 	#[Route('/api/login', name: 'api_login', methods: 'POST')]
 	public function login(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): Response
 	{
+		$response = new Response();
+
 		$data = $request->getContent();
 		$data = json_decode($data, true);
 		$email = $data['email'];
@@ -39,21 +41,46 @@ class UserController extends AbstractController
 
 					// Generate User's new Api-key
 					$userId = $user->getId();
-					$apiKey = base64_encode(random_bytes(20)) . strval($user->getId());
+					$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+					$charactersLength = strlen($characters);
+					$randomString = '';
+					for ($i = 0; $i < $charactersLength; $i++) {
+						$randomString .= $characters[rand(0, $charactersLength - 1)];
+					}
+					$apiKey = $randomString . strval($user->getId());
 					$userRepository->updateUsersApiKey($apiKey, $userId);
 				}
 
-				return $this->json([
-					$user->getUserApiKey()
-				]);
+				return $response->setContent(json_encode([
+					'userApiKey' => $user->getUserApiKey()
+				]));
 			}
-			return $this->json([
-				'Wrong password!'
-			]);
+
+			return $response->setContent(json_encode([
+				'error' => 'Wrong password!'
+			]));
 		}
-		return $this->json([
-			'There is no user with provided email!'
-		]);
+
+		return $response->setContent(json_encode([
+			'error' => 'There is no user with provided email!'
+		]));
+	}
+
+	// Find user by Api key
+	#[Route('/api/get/user/by/api', name: 'api_get_user', methods: 'POST')]
+	public function findUserByApiKey(Request $request, UserRepository $userRepository): Response {
+		$response = new Response();
+
+		$data = $request->getContent();
+		$data = json_decode($data, true);
+		$apiKey = $data['apiKey'];
+		$user = $userRepository->findUserByApiKey($apiKey);
+
+		return $user ?
+			$this->json($user) :
+			$response->setContent(json_encode([
+				'delete' => 'Deleting cookie!'
+			]));
 	}
 
 	#[Route('/api/register', name: 'api_register', methods: 'POST')]
