@@ -78,31 +78,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): self
     {
         $this->email = $email;
-
         return $this;
     }
 
 	public function getUsername(): ?string
-                      {
-                          return $this->username;
-                      }
+	{
+		return $this->username;
+	}
 
 	public function setUsername(string $username): self
-                      {
-                      $this->username = $username;
-                  
-                      return $this;
-                      }
+	{
+		$this->username = $username;
+		return $this;
+	}
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
+	/**
+	 * A visual identifier that represents this user.
+	 *
+	 * @see UserInterface
+	 */
+	public function getUserIdentifier(): string
+	{
+	    return (string) $this->email;
+	}
 
     /**
      * @see UserInterface
@@ -119,7 +117,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
-
         return $this;
     }
 

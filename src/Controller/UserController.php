@@ -87,20 +87,22 @@ class UserController extends AbstractController
 	public function register(Request $request, UserPasswordHasherInterface $passwordHasher): Response
 	{
 		$user = new User();
-		$user->setEmail($request->get('email'));
-		$user->setUsername($request->get('username'));
-		$user->setFname($request->get('fname'));
-		$user->setLname($request->get('lname'));
+		$data = $request->getContent();
+		$data = json_decode($data, true);
+		$user->setEmail($data['email']);
+		$user->setUsername($data['username']);
+		$user->setFname($data['fname']);
+		$user->setLname($data['lname']);
 
 		// Password Hashing
-		$plaintextPassword = $request->get('password');
+		$plaintextPassword = $data['password'];
 		$hashedPassword = $passwordHasher->hashPassword(
 			$user,
 			$plaintextPassword
 		);
 		$user->setPassword($hashedPassword);
-		$user->setAge($request->get('age'));
-		$user->setGender($request->get('gender'));
+		$user->setAge($data['age']);
+		$user->setGender($data['gender']);
 
 		$em = $this->getDoctrine()->getManager();
 		$em->persist($user);
