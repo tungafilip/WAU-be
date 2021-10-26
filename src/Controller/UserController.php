@@ -84,30 +84,56 @@ class UserController extends AbstractController
 	}
 
 	#[Route('/api/register', name: 'api_register', methods: 'POST')]
-	public function register(Request $request, UserPasswordHasherInterface $passwordHasher): Response
+	public function register(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): Response
 	{
+		$response = new Response();
 		$user = new User();
 		$data = $request->getContent();
 		$data = json_decode($data, true);
-		$user->setEmail($data['email']);
-		$user->setUsername($data['username']);
-		$user->setFname($data['fname']);
-		$user->setLname($data['lname']);
+		$emailError = '';
+		$usernameError = '';
+		$error = false;
 
-		// Password Hashing
-		$plaintextPassword = $data['password'];
-		$hashedPassword = $passwordHasher->hashPassword(
-			$user,
-			$plaintextPassword
-		);
-		$user->setPassword($hashedPassword);
-		$user->setAge($data['age']);
-		$user->setGender($data['gender']);
+		// Email exist checker
+		if($userRepository->findUserByEmail($data['email'])) {
+			$error = true;
+			$emailError = 'The user with this email is already registered!';
+		}
 
-		$em = $this->getDoctrine()->getManager();
-		$em->persist($user);
-		$em->flush();
+		// Username exist checker
+		if($userRepository->findUserByUsername($data['username'])) {
+			$error = true;
+			$usernameError = 'The user with this username is already registered!';
+		}
 
-		return $this->json($user);
+		$response->setContent(json_encode([
+			'email' => $emailError,
+			'username' => $usernameError
+		]));
+
+		if($error == false) {
+			$user->setEmail($data['email']);
+			$user->setUsername($data['username']);
+			$user->setFname($data['fname']);
+			$user->setLname($data['lname']);
+
+			// Password Hashing
+			$plaintextPassword = $data['password'];
+			$hashedPassword = $passwordHasher->hashPassword(
+				$user,
+				$plaintextPassword
+			);
+			$user->setPassword($hashedPassword);
+			$user->setAge($data['age']);
+			$user->setGender($data['gender']);
+
+			$em = $this->getDoctrine()->getManager();
+			$em->persist($user);
+			$em->flush();
+
+			return $this->json($user);
+		}
+
+		return $response;
 	}
 }
