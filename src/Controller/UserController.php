@@ -33,36 +33,36 @@ class UserController extends AbstractController
 
 			// Compare hashed password with plaintext password
 			$compare = $passwordHasher->isPasswordValid($user, $plaintextPassword);
-			if ($compare) {
-
-				// User Api Key
-				$userApiKey = $user->getUserApiKey();
-				if (!$userApiKey) {
-
-					// Generate User's new Api-key
-					$userId = $user->getId();
-					$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-					$charactersLength = strlen($characters);
-					$randomString = '';
-					for ($i = 0; $i < $charactersLength; $i++) {
-						$randomString .= $characters[rand(0, $charactersLength - 1)];
-					}
-					$apiKey = $randomString . strval($user->getId());
-					$userRepository->updateUsersApiKey($apiKey, $userId);
-				}
-
-				return $response->setContent(json_encode([
-					'userApiKey' => $user->getUserApiKey()
-				]));
-			}
+//			if ($compare) {
+//
+//				// User Api Key
+//				$userApiKey = $user->getUserApiKey();
+//				if (!$userApiKey) {
+//
+//					// Generate User's new Api-key
+//					$userId = $user->getId();
+//					$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+//					$charactersLength = strlen($characters);
+//					$randomString = '';
+//					for ($i = 0; $i < $charactersLength; $i++) {
+//						$randomString .= $characters[rand(0, $charactersLength - 1)];
+//					}
+//					$apiKey = $randomString . strval($user->getId());
+//					$userRepository->updateUsersApiKey($apiKey, $userId);
+//				}
+//
+//				return $response->setContent(json_encode([
+//					'userApiKey' => $user->getUserApiKey()
+//				]));
+//			}
 
 			return $response->setContent(json_encode([
-				'error' => 'Wrong password!'
+				'passwordError' => 'Wrong password!'
 			]));
 		}
 
 		return $response->setContent(json_encode([
-			'error' => 'There is no user with provided email!'
+			'emailError' => 'There is no user with provided email!'
 		]));
 	}
 
@@ -92,6 +92,7 @@ class UserController extends AbstractController
 		$data = json_decode($data, true);
 		$emailError = '';
 		$usernameError = '';
+		$ageError = '';
 		$error = false;
 
 		// Email exist checker
@@ -106,9 +107,16 @@ class UserController extends AbstractController
 			$usernameError = 'The user with this username is already registered!';
 		}
 
+		// Age between checker
+		if($data['age'] < 18 || $data['age'] > 70) {
+			$error = true;
+			$ageError = 'You need to be older than 18 and younger than 70 years.';
+		}
+
 		$response->setContent(json_encode([
-			'email' => $emailError,
-			'username' => $usernameError
+			'emailError' => $emailError,
+			'usernameError' => $usernameError,
+			'ageError' => $ageError,
 		]));
 
 		if($error == false) {
