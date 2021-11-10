@@ -51,11 +51,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $lname;
 
     /**
-     * @ORM\Column(type="integer")
-     */
-    private $age;
-
-    /**
      * @ORM\Column(type="string", length=255)
      */
     private $gender;
@@ -64,6 +59,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string", length=255, unique=true, nullable=true)
      */
     private $userApiKey;
+
+    /**
+     * @ORM\Column(type="date")
+     */
+    private $birthday;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $lastLogin;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $active;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $avatar;
 
     public function getId(): ?int
     {
@@ -83,14 +98,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 	public function getUsername(): ?string
 	{
-		return $this->username;
+	    return $this->username;
 	}
 
 	public function setUsername(string $username): self
-	{
-		$this->username = $username;
-		return $this;
-	}
+    {
+        $this->username = $username;
+        return $this;
+    }
 
 	/**
 	 * A visual identifier that represents this user.
@@ -98,9 +113,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 	 * @see UserInterface
 	 */
 	public function getUserIdentifier(): string
-	{
-	    return (string) $this->email;
-	}
+    {
+        return (string) $this->email;
+    }
 
     /**
      * @see UserInterface
@@ -179,18 +194,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getAge(): ?int
-    {
-        return $this->age;
-    }
-
-    public function setAge(int $age): self
-    {
-        $this->age = $age;
-
-        return $this;
-    }
-
     public function getGender(): ?string
     {
         return $this->gender;
@@ -211,6 +214,54 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUserApiKey(string $userApiKey): self
     {
         $this->userApiKey = $userApiKey;
+
+        return $this;
+    }
+
+    public function getBirthday(): ?\DateTimeInterface
+    {
+        return $this->birthday;
+    }
+
+    public function setBirthday(\DateTimeInterface $birthday): self
+    {
+        $this->birthday = $birthday;
+
+        return $this;
+    }
+
+    public function getLastLogin(): ?\DateTimeInterface
+    {
+        return $this->lastLogin;
+    }
+
+    public function setLastLogin(?\DateTimeInterface $lastLogin): self
+    {
+        $this->lastLogin = $lastLogin;
+
+        return $this;
+    }
+
+    public function getActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): self
+    {
+        $this->active = $active;
+
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(string $avatar): self
+    {
+        $this->avatar = $avatar;
 
         return $this;
     }

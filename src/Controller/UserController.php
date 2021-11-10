@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,11 +15,6 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class UserController extends AbstractController
 {
-	#[Route('/api/top', name: 'api_top')]
-	public function top(): Response {
-		return $this->json('top');
-	}
-
 	#[Route('/api/login', name: 'api_login', methods: 'POST')]
 	public function login(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): Response
 	{
@@ -33,28 +29,28 @@ class UserController extends AbstractController
 
 			// Compare hashed password with plaintext password
 			$compare = $passwordHasher->isPasswordValid($user, $plaintextPassword);
-//			if ($compare) {
-//
-//				// User Api Key
-//				$userApiKey = $user->getUserApiKey();
-//				if (!$userApiKey) {
-//
-//					// Generate User's new Api-key
-//					$userId = $user->getId();
-//					$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-//					$charactersLength = strlen($characters);
-//					$randomString = '';
-//					for ($i = 0; $i < $charactersLength; $i++) {
-//						$randomString .= $characters[rand(0, $charactersLength - 1)];
-//					}
-//					$apiKey = $randomString . strval($user->getId());
-//					$userRepository->updateUsersApiKey($apiKey, $userId);
-//				}
-//
-//				return $response->setContent(json_encode([
-//					'userApiKey' => $user->getUserApiKey()
-//				]));
-//			}
+			if ($compare) {
+
+				// User Api Key
+				$userApiKey = $user->getUserApiKey();
+				if (!$userApiKey) {
+
+					// Generate User's new Api-key
+					$userId = $user->getId();
+					$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+					$charactersLength = strlen($characters);
+					$randomString = '';
+					for ($i = 0; $i < $charactersLength; $i++) {
+						$randomString .= $characters[rand(0, $charactersLength - 1)];
+					}
+					$apiKey = $randomString . strval($user->getId());
+					$userRepository->updateUsersApiKey($apiKey, $userId);
+				}
+
+				return $response->setContent(json_encode([
+					'userApiKey' => $user->getUserApiKey()
+				]));
+			}
 
 			return $response->setContent(json_encode([
 				'passwordError' => 'Wrong password!'
@@ -64,6 +60,25 @@ class UserController extends AbstractController
 		return $response->setContent(json_encode([
 			'emailError' => 'There is no user with provided email!'
 		]));
+	}
+
+	// Change user's data (Settings)
+	#[Route('/api/update/user', name: 'api_update_user', methods: 'POST')]
+	public function changeUserData(Request $request, UserRepository $userRepository, EntityManagerInterface $em): Response {
+		$data = $request->getContent();
+		$data = json_decode($data, true);
+		$user = $userRepository->findUserById($data['id']);
+		$user->setFname($data['fname']);
+		$user->setLname($data['lname']);
+		$user->setUsername($data['username']);
+		$user->setEmail($data['email']);
+
+		// Convert string to date
+		$time_input = strtotime($data['birthday']);
+		$date = getdate($time_input);
+		$user->setBirthday($date);
+
+		$user->setGender($data['gender']);
 	}
 
 	// Find user by Api key
@@ -139,7 +154,7 @@ class UserController extends AbstractController
 			$em->persist($user);
 			$em->flush();
 
-			return $this->json($user);
+			return $this->json($data);
 		}
 
 		return $response;

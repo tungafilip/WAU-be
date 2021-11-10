@@ -40,12 +40,22 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->flush();
     }
 
+	// Find User by id
+	public function findUserById($id): ?User
+		{
+		return $this->createQueryBuilder('u')
+			->andWhere('u.id = :id')
+			->setParameter('id', $id)
+			->getQuery()
+			->getOneOrNullResult();
+		}
+
 	// Find User by username
 	public function findUserByUsername($username): ?User
 	{
 		return $this->createQueryBuilder('u')
-			->andWhere('u.username = :val')
-			->setParameter('val', $username)
+			->andWhere('u.username = :username')
+			->setParameter('username', $username)
 			->getQuery()
 			->getOneOrNullResult();
 	}
@@ -54,11 +64,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 	public function findUserByEmail($email): ?User
 	{
 		return $this->createQueryBuilder('u')
-			->andWhere('u.email = :val')
-			->setParameter('val', $email)
+			->andWhere('u.email = :email')
+			->setParameter('email', $email)
 			->getQuery()
 			->getOneOrNullResult();
 	}
+
+//	// Update User's data
+//	public function updateUsersApiKey($apiKey, $userId)
+//		{
+//		$query = $this->em->createQueryBuilder()
+//			->update(User::class, 'u')
+//			->set('u.userApiKey', ':apiKey')
+//			->where('u.id = :userId')
+//			->setParameter('apiKey', $apiKey)
+//			->setParameter('userId', $userId)
+//			->getQuery();
+//		return $query->execute();
+//		}
 
 	// Update User's Api-KEY
 	public function updateUsersApiKey($apiKey, $userId)
